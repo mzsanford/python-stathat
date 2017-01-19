@@ -5,8 +5,8 @@ stathat
 Blah blah blah.
 """
 
-import urllib
-import urllib2
+import requests
+
 try:
     import simplejson as json
 except ImportError:
@@ -91,28 +91,29 @@ class _StatHatBase(object):
             # If the request isn't async, we should make an effort
             # to parse the response and return it, or raise a proper exception
             try:
-                raw = self._send_inner(endpoint, payload)
-            except urllib2.URLError, e:
+                raw_response = self._send_inner(endpoint, payload)
+            except IOError, e:
                 # Network issue or something else affecting the general request
                 raise StatHatError(e)
             try:
-                resp = json.loads(raw)
+                resp_dict = raw_response.json()
             except Exception:
                 # JSON decoding failed meaning StatHat returned something bad
-                raise StatHatError('Something bad happened: %s' % raw)
-            if 'msg' in resp and 'status' in resp:
-                if resp['status'] != 200:
+                raise StatHatError('Something bad happened: %s' % raw_response.text)
+
+            if 'status' in resp_dict and 'msg' in resp_dict:
+                if resp_dict['status'] != 200 and 'msg' in resp_dict:
                     # Normal error from StatHat
-                    raise StatHatError(resp['msg'])
-            else:
-                # 'msg' and 'status' keys weren't returned, something bad happened
-                raise StatHatError('Something bad happened: %s' % raw)
+                    raise StatHatError(resp_dict['msg'])
+                else:
+                    # 'msg' and 'status' keys weren't returned, something bad happened
+                    raise StatHatError('Something bad happened: %s' % raw_response.text)
         return True
 
     def _send_inner(self, endpoint, data, silent=False):
         try:
-            return urllib2.urlopen(endpoint, urllib.urlencode(data)).read()
-        except urllib2.URLError:
+            return requests.post(endpoint, data=data)
+        except IOError:
             # We want to surface the error on non-async requests
             if not silent:
                 raise
