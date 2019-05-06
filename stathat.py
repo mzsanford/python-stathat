@@ -92,7 +92,7 @@ class _StatHatBase(object):
             # to parse the response and return it, or raise a proper exception
             try:
                 raw = self._send_inner(endpoint, payload)
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 # Network issue or something else affecting the general request
                 raise StatHatError(e)
             try:
