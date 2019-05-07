@@ -4,7 +4,7 @@ stathat
 
 Blah blah blah.
 """
-
+from __future__ import absolute_import
 import urllib
 import urllib2
 try:
