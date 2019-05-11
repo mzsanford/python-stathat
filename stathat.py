@@ -93,7 +93,7 @@ class _StatHatBase(object):
             # to parse the response and return it, or raise a proper exception
             try:
                 raw_response = self._send_inner(endpoint, payload)
-            except IOError, e:
+            except IOError as e:
                 # Network issue or something else affecting the general request
                 raise StatHatError(e)
             try:
